@@ -1,0 +1,15 @@
+{
+  "presets": [
+    "env",
+    "stage-0",
+    "react"
+  ],
+  "plugins": [
+    "syntax-dynamic-import",
+    ["import", {
+      "libraryName": "antd",
+      "style": "true"
+      }
+    ]
+  ]
+}
