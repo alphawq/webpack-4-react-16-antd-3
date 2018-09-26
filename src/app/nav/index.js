@@ -67,7 +67,7 @@ export default class extends Component{
 				collapsed={collapsed}
 				onCollapse={this.onCollapse}>
 				<Link to='/'>
-					<div className="logo" style={{height: 60}} />
+					<div className="logo"/>
 				</Link>
 				<Menu
 					mode="inline"

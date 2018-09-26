@@ -34,7 +34,7 @@ module.exports = merge(base, {
              * */ 
             javascriptEnabled: true,
             //  自定义antd主题
-            modifyVars: { "@primary-color": "#1890FF" }
+            modifyVars: { "@primary-color": "#34bb8e" }
           }
         }],
       }

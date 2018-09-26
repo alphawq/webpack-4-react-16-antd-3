@@ -3,8 +3,10 @@
 const path = require('path')
 const webpack = require('webpack')
 const { base: baseConf } = require('./conf')
-const { getEntry, getOutput, assetsPath } = require('./utils')
+const bundleConfig = require('./dll-config.json')
+const { getEntry, getOutput, assetsPath, getEnvConf } = require('./utils')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const safeParser = require('postcss-safe-parser')
 // console.log(process.env.NODE_ENV, '<<<') // undefined
@@ -126,11 +128,18 @@ module.exports = {
       },
       // 把所有产出文件注入到给定的 template 或templateContent。
       // 当传入 true 或者 'body' 时所有 javascript 资源将被放置在body 元素的底部，'head' 则会放在 head 元素内。
-      inject: false
+      inject: true,
+      vendorJsName: bundleConfig.vendor.js,
     }),
     new webpack.DllReferencePlugin({
       context: __dirname,
       manifest: require('./vendor-manifest.json')
     }),
+    new CopyWebpackPlugin([{
+      from: {
+        glob: 'static/js/*'
+      },
+      to: getEnvConf().conf.assetsRoot
+    }])
   ]
 }
