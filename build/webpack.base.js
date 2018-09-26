@@ -1,10 +1,12 @@
 'use strict'
 
 const path = require('path')
+const webpack = require('webpack')
 const { base: baseConf } = require('./conf')
 const { getEntry, getOutput, assetsPath } = require('./utils')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const safeParser = require('postcss-safe-parser')
 // console.log(process.env.NODE_ENV, '<<<') // undefined
 
 module.exports = {
@@ -55,7 +57,12 @@ module.exports = {
       //     sourceMap: true // set to true if you want JS source maps
       // }),
       // 压缩css
-      new OptimizeCSSAssetsPlugin({ cssProcessorOptions: { safe: true } })
+      new OptimizeCSSAssetsPlugin({
+        parser: safeParser,
+        discardComments: {
+          removeAll: true
+        }
+      })
     ],
     // 用于拆分代码，找到 chunk 中共同依赖的模块,取出来生成单独的 chunk
     /**
@@ -83,12 +90,32 @@ module.exports = {
     }
   },
   plugins: [
+    // 不配置任何选项的html-webpack-plugin插件，
+    // 会默认将webpack中的entry配置所有入口chunk和extract-text-webpack-plugin抽取的css样式都插入到文件指定的位置
     new HtmlWebpackPlugin({
+    /**
+     *  1、filename配置的html文件目录是相对于webpackConfig.output.path路径而言的，不是相对于当前项目目录结构的。
+     *  2、指定生成的html文件内容中的link和script路径是相对于生成目录下的，写路径的时候请写生成目录下的相对路径。
+     * */ 
+      // filename: '',
       template: baseConf.entryTemp,
+      // Adds the given favicon path to the output HTML
+      favicon: 'static/img/favicon.ico',
       // 如果是 true ，会给所有包含的 script 和 css 添加一个唯一的 webpack 编译 hash 值。这对于缓存清除非常有用。
       hash: false,
       // 如果传入 true（默认），错误信息将写入 html 页面
       showErrors: true,
+      // 允许插入到模板中的一些chunk，不配置此项默认会将entry中所有的thunk注入到模板中。在配置多个页面时，每个页面注入的chunk应该是不相同的，需要通过该配置为不同页面注入不同的chunk
+      // chunks: [],
+      //  这个与chunks配置项正好相反，用来配置不允许注入的chunk
+      // excludeChunks: [],
+      /**
+       *  none | auto| function，默认auto； 允许指定的thunk在插入到html文档前进行排序。
+       *    - function值可以指定具体排序规则；
+       *    - auto基于thunk的id进行排序； 
+       *    - none就是不排序
+       */
+      chunksSortMode: 'none',
       // 传一个 html-minifier 插件的配置 object 来压缩输出。
       minify: {
         removeRedundantAttributes:true, // 删除多余的属性
@@ -99,7 +126,11 @@ module.exports = {
       },
       // 把所有产出文件注入到给定的 template 或templateContent。
       // 当传入 true 或者 'body' 时所有 javascript 资源将被放置在body 元素的底部，'head' 则会放在 head 元素内。
-      inject: true
-    })
+      inject: false
+    }),
+    new webpack.DllReferencePlugin({
+      context: __dirname,
+      manifest: require('./vendor-manifest.json')
+    }),
   ]
 }

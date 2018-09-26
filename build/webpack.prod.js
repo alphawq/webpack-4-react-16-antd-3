@@ -1,5 +1,6 @@
+const webpack = require('webpack')
 const merge = require('webpack-merge')
-const base = require('./webpack.base.config')
+const base = require('./webpack.base')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 // 该插件已不再支持webpack@4.3.0
 // const ExtractTextPlugin = require('extract-text-webpack-plugin')
@@ -24,11 +25,18 @@ module.exports = merge(base, {
             // by default it use publicPath in webpackOptions.output
             // publicPath: '../'
           }
-        }, 'css-loader', 'less-loader'],
-          // ExtractTextPlugin.extract({
-          // fallback: 'style-loader',
-          // use: ['css-loader', 'less-loader']
-          // }),  
+        }, 'css-loader',  {
+          loader: 'less-loader',
+          options: {
+            /**
+             * to fix antd引入样式文件报错
+             * https://stackoverflow.com/questions/46729091/enable-inline-javascript-in-less
+             * */ 
+            javascriptEnabled: true,
+            //  自定义antd主题
+            modifyVars: { "@primary-color": "#1890FF" }
+          }
+        }],
       }
     ]
   },
@@ -36,10 +44,10 @@ module.exports = merge(base, {
     new CleanWebpackPlugin(['dist'], { root: process.cwd() }),
     // 参见【缓存】章节 https://webpack.docschina.org/guides/caching
     new webpack.HashedModuleIdsPlugin(),
-    // ExtractTextPlugin
+    // MiniCssExtractPlugin
     new MiniCssExtractPlugin({
-      filename: 'app.[contenthash:7].css',
-      chunkFileName: '[name].[contenthash:7].css'
+      filename: 'static/css/app.[contenthash:7].css',
+      chunkFileName: 'static/css/[name].[contenthash:7].css'
     })
   ]
 })
