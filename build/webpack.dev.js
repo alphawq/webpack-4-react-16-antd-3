@@ -2,6 +2,7 @@ const webpack = require('webpack')
 const merge = require('webpack-merge')
 const base = require('./webpack.base')
 const resolve = require('./utils').resolve(__dirname)
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = merge(base, {
   /**
@@ -24,7 +25,6 @@ module.exports = merge(base, {
       }, {
         test: /\.less$/,
         include: [resolve('../src'),resolve('../static/css')],
-        // loader: ['style-loader', 'css-loader', 'less-loader'],
         use: ['style-loader', 'css-loader', {
             loader: 'less-loader',
             options: {
@@ -33,7 +33,7 @@ module.exports = merge(base, {
                * https://stackoverflow.com/questions/46729091/enable-inline-javascript-in-less
                * */ 
               javascriptEnabled: true,
-              //  自定义antd主题
+              //  自定义antd主题色
               modifyVars: { "@primary-color": "#34bb8e" }
             }
           }
@@ -59,9 +59,10 @@ module.exports = merge(base, {
      *  弊端：由于模块的相对路径有可能会很长，那么就会占用大量的空间
      *  开发环境一般都是禁用缓存的，所以在开发环境，一般不用这个插件。
      *  生产环境，推荐使用 【HashedModuleIdsPlugin】
-     *  mode: development 会默认启用改插件
+     *  mode: development 会默认启用该插件
      */ 
     // new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
+    new BundleAnalyzerPlugin()
   ]
 })

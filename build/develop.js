@@ -9,7 +9,7 @@ const webpack = require('webpack')
 const config = require('./webpack.dev')
 const webpackDevServer = require('webpack-dev-server')
 const { devServerIp, port } = develop
-
+console.log(config)
 let compiler = webpack(config)
 let server = new webpackDevServer(compiler, {
   inline: true,

@@ -7,18 +7,21 @@ const bundleConfig = require('./dll-config.json')
 const { getEntry, getOutput, assetsPath, getEnvConf } = require('./utils')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
-const safeParser = require('postcss-safe-parser')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 // console.log(process.env.NODE_ENV, '<<<') // undefined
 
 module.exports = {
   mode: 'none',
   // entry 和 module.rules.loader 选项相对于context解析
   context: baseConf.context,
+  performance: {
+    hints: false
+  },
   entry: getEntry(),
   output: getOutput(),
   resolve: {
-    extensions: ['.js', '.jsx'],
+    // 指定extension之后可以不用在require或是import的时候加文件扩展名,会依次尝试添加扩展名进行匹配
+    extensions: ['.js', '.jsx', '.json'],
     modules: [baseConf.sourceCode, baseConf.node_modules],
     alias: {
       'static': path.resolve(__dirname, '../static')
@@ -44,52 +47,7 @@ module.exports = {
         limit: 1024 * 8,
         name: assetsPath('fonts/[name].[ext]?[hash:7]')
       }
-    }],
-  },
-  optimization: {
-    // 将 webpack 生成的 runtime 作为独立 chunk ，runtime 包含在模块交互时，模块所需的加载和解析逻辑（manifest）
-    runtimeChunk: 'single',
-    // 用于控制压缩的开关，开发环境默认关闭，生产环境默认开启
-    // minimize: true,
-    // 用于配置 minimizers 和选项
-    minimizer: [ 
-      // new UglifyJsPlugin({
-      //     cache: true,
-      //     parallel: true,
-      //     sourceMap: true // set to true if you want JS source maps
-      // }),
-      // 压缩css
-      new OptimizeCSSAssetsPlugin({
-        parser: safeParser,
-        discardComments: {
-          removeAll: true
-        }
-      })
-    ],
-    // 用于拆分代码，找到 chunk 中共同依赖的模块,取出来生成单独的 chunk
-    /**
-     *   chunks: 表示哪些代码需要优化，有三个可选值：initial(初始块)、async(按需加载块)、all(全部块)，默认为async
-     *   minSize: 表示在压缩前的最小模块大小，默认为30000
-     *   minChunks: 表示被引用次数，默认为1
-     *   maxAsyncRequests: 按需加载时候最大的并行请求数，默认为5
-     *   maxInitialRequests: 一个入口最大的并行请求数，默认为3
-     *   automaticNameDelimiter: 命名连接符
-     *   name: 拆分出来块的名字，默认由块名和hash值自动生成
-     *   cacheGroups: 缓存组。缓存组的属性除上面所有属性外，还有test, priority, reuseExistingChunk
-     *    - test: 用于控制哪些模块被这个缓存组匹配到
-     *    - priority: 缓存组打包的先后优先级
-     *    - reuseExistingChunk: 如果当前代码块包含的模块已经有了，就不在产生一个新的代码块
-     */ 
-    splitChunks: {
-      cacheGroups: {
-        chunks: 'async',
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all'
-        }
-      }
-    }
+    }]
   },
   plugins: [
     // 不配置任何选项的html-webpack-plugin插件，
@@ -107,14 +65,14 @@ module.exports = {
       hash: false,
       // 如果传入 true（默认），错误信息将写入 html 页面
       showErrors: true,
-      // 允许插入到模板中的一些chunk，不配置此项默认会将entry中所有的thunk注入到模板中。在配置多个页面时，每个页面注入的chunk应该是不相同的，需要通过该配置为不同页面注入不同的chunk
+      // 允许插入到模板中的一些chunk，不配置此项默认会将entry中所有的chunk注入到模板中。在配置多个页面时，每个页面注入的chunk应该是不相同的，需要通过该配置为不同页面注入不同的chunk
       // chunks: [],
       //  这个与chunks配置项正好相反，用来配置不允许注入的chunk
       // excludeChunks: [],
       /**
-       *  none | auto| function，默认auto； 允许指定的thunk在插入到html文档前进行排序。
+       *  none | auto| function，默认auto； 允许指定的chunk在插入到html文档前进行排序。
        *    - function值可以指定具体排序规则；
-       *    - auto基于thunk的id进行排序； 
+       *    - auto基于chunk的id进行排序； 
        *    - none就是不排序
        */
       chunksSortMode: 'none',

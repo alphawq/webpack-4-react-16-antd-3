@@ -1,4 +1,5 @@
 process.env.NODE_ENV = 'production'
+
 const os = require('os');
 const chalk = require('chalk')
 const works = os.cpus().length - 1;
@@ -8,13 +9,7 @@ const configPath = require.resolve('./webpack.prod.js');
 run(configPath, {
   watch: false,
   maxRetries: 1,
-  stats: {
-    colors: true,
-    errors: true,
-    warnings: false,
-    modules: false,
-    chunks: false
-  },
+  stats:false,
   maxConcurrentWorkers: works  // 最小取2
 }, (err, stats) => {
   if (err) {

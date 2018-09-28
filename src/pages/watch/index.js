@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import './index.less'
 
 export default class extends Component {
   constructor(props){
@@ -7,7 +8,7 @@ export default class extends Component {
   }
   render() {
     return (
-      <h2>watch</h2>
+      <h2 className="test">watch</h2>
     )
   }
 }
